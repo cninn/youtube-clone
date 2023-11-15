@@ -6,6 +6,7 @@ import commentsRoute from "./routes/commentsroute.js";
 import videosRoute from "./routes/videosroute.js";
 import authRoute from "./routes/authroute.js";
 import cookieParser from "cookie-parser";
+import cors from 'cors'
 
 const app = express();
 
@@ -16,6 +17,10 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("database connection successful"))
   .catch((err) => console.log(err));
+
+  app.use(cors({
+    origins: "http://localhost:3000",
+  }));
 
 //! ROUTES
 app.use(cookieParser());

@@ -1,5 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
+import axios from 'axios';
+import {  useDispatch } from 'react-redux'
+import { loginStart, loginSuccess, loginFailure, logout } from "../redux/userSlice";
 
 const Container = styled.div`
 padding: 22px 96px;
@@ -74,14 +77,36 @@ color: ${({theme})=>theme.soft};
 
 `
 const Login = () => {
+
+  const [name,setName] = useState('')
+  const [email,setEmail] = useState('')
+  const [password,setPassword] = useState('')
+  const dispatch = useDispatch();
+
+  const handleLoginFunction = async(e)=>{
+    e.preventDefault();
+    dispatch(loginStart())
+    try {
+      const  res = await axios.post('http://localhost:8800/api/auth/signin',{
+        name,
+        password
+      })
+      
+        dispatch(loginSuccess(res.data))
+     
+    } catch (error) {
+      dispatch(loginFailure())
+    }
+  }
+
   return (
     <Container>
       <Wrapper>
       <h2>Giriş Yap</h2>
       <h4>Fremium avantajları seni bekliyor</h4>
-      <Input placeholder='Kullanıcı adı'/>
-      <Input placeholder='Şifre'/>
-      <Button>
+      <Input onChange={e=>setName(e.target.value)} placeholder='Kullanıcı adı'/>
+      <Input type='password' onChange={e=>setPassword(e.target.value)} placeholder='Şifre'/>
+      <Button onClick={handleLoginFunction}>
         Giriş Yap
       </Button>
       <SoftText>
@@ -90,9 +115,9 @@ const Login = () => {
       </SoftText>
       <h2>Kayıt Ol</h2>
       
-      <Input placeholder='Kullanıcı adı'/>
-      <Input placeholder='Email'/>
-      <Input placeholder='Şifre'/>
+      <Input onChange={e=>setName(e.target.value)} placeholder='Kullanıcı adı'/>
+      <Input onChange={e=>setEmail(e.target.value)} placeholder='Email' type='email'/>
+      <Input type='password' onChange={e=>setPassword(e.target.value)} placeholder='Şifre'/>
       <Button style={{backgroundColor:'#2f7bff'}}>
         Kayıt Ol
       </Button>

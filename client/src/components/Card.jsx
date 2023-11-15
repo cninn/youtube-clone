@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Link } from "react-router-dom";
+import {format} from 'timeago.js';
+import axios from 'axios';
 
 const Container = styled.div`
   width: ${(props) => props.type !== "sm" && "360px"};
@@ -72,29 +74,56 @@ const Eyes = styled.div`
 const Icon = styled.span`
 display:  ${(props) => props.type === "sm" && "none"};
 `
-const Card = ({ type }) => {
+const Card = ({ type , video}) => {
+
+  const [channel,setChannel] = useState([]);
+
+  useEffect(()=>{
+    const fetchChannel = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8800/api/users/find/${video.userId}`);
+        setChannel(response.data);
+        
+       
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchChannel()
+  },[video.userId])
+  
+
+
+
+
+
+
+
+
+
+
   return (
-    <Link style={{ textDecoration: "none" }} to={"/video/test"}>
+    <Link style={{ textDecoration: "none" }} to={`/video/${video.userId}`}>
       <Container type={type}>
         <Image
           type={type}
-          src="https://img.chip.com.tr/rcman/Cw912h570q95gm/images/content/2020/01/26/202001262352201588.jpg"
+          src={video.imgUrl}
         />
         <Details type={type}>
           <ChannelImage
-            src="https://images.unsplash.com/photo-1511367461989-f85a21fda167?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D"
+            src={channel.img ? channel.img :"https://images.unsplash.com/photo-1511367461989-f85a21fda167?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D"}
             type={type}
           />
           <Texts type={type}>
-            <Title type={type}>FullStack Roadmap</Title>
-            <ChannelName type={type}>cninnmakes</ChannelName>
+            <Title type={type}>{video.title}</Title>
+            <ChannelName type={type}>{channel.name}</ChannelName>
             <Info type={type}>
-              <p>6 gün önce yüklendi</p>
+              <p>{format(video.createdAt)}</p>
               <Eyes>
                 <Icon type={type}>
                 <VisibilityIcon />
                 </Icon>
-                156 Görüntüleme
+               {video.views ? `${video.views} Görüntüleme` : '698,999M Görüntüleme'}
               </Eyes>
             </Info>
           </Texts>
