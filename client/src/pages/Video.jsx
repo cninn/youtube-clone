@@ -1,14 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ShareIcon from "@mui/icons-material/Share";
 import DataSaverOnIcon from "@mui/icons-material/DataSaverOn";
 import Comments from "../components/Comments";
-import Card  from '../components/Card'
+/* import Card from "../components/Card"; */
+import { useDispatch, useSelector } from "react-redux";
+import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
+import ThumbDownOffAltOutlinedIcon from "@mui/icons-material/ThumbDownOffAltOutlined";
+
+import { subscription } from "../redux/userSlice";
+import { fetchSuccess, like, dislike } from "../redux/videoSlice";
+import { useLocation } from "react-router-dom";
+import axios from "axios";
+import { format } from "timeago.js";
+import Recommendation from "../components/Recommendation";
+
+
+
+
+
 
 const Container = styled.div`
-
   display: flex;
   gap: 24px;
   padding-left: 40px;
@@ -54,10 +68,7 @@ const Hr = styled.hr`
   opacity: 0.5;
 `;
 
-const Recommendation = styled.div`
 
-  flex: 2;
-`;
 const Channel = styled.div`
   width: 100%;
   background-color: ${({ theme }) => theme.bg};
@@ -108,30 +119,81 @@ const SubscribeButton = styled.button`
   cursor: pointer;
   align-self: flex-start;
 `;
+const VideoFrame = styled.video`
+  max-height: 500px;
+  width: 100%;
+  object-fit: cover;
+`;
 
 const Video = () => {
+
+
+  const { currentUser } = useSelector((state) => state.user);
+  const { currentVideo } = useSelector((state) => state.video);
+  const dispatch = useDispatch();
+
+  const path = useLocation().pathname.split("/")[2];
+
+  const [channel, setChannel] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const videoRes = await axios.get(`/videos/find/${path}`);
+        const channelRes = await axios.get(
+          `/users/find/${videoRes.data.userId}`
+        );
+        setChannel(channelRes.data);
+        dispatch(fetchSuccess(videoRes.data));
+      } catch (err) {}
+    };
+    fetchData();
+  }, [path, dispatch]);
+
+  const handleLike = async () => {
+    await axios.put(`/users/like/${currentVideo._id}`);
+    dispatch(like(currentUser._id));
+  };
+  const handleDislike = async () => {
+    await axios.put(`/users/dislike/${currentVideo._id}`);
+    dispatch(dislike(currentUser._id));
+  };
+
+  const handleSub = async () => {
+    currentUser.subscribedUsers.includes(channel._id)
+      ? await axios.put(`/users/unsub/${channel._id}`)
+      : await axios.put(`/users/sub/${channel._id}`);
+    dispatch(subscription(channel._id));
+  };
+
+
   return (
     <Container>
       <Content>
         <VideoWrapper>
-          <iframe
-            width="100%"
-            height="500"
-            src="https://www.youtube.com/embed/-vufEiLvuAY?si=kfhZOrBJ7AbLArhu"
-            title="YouTube video player"
-            frameBorder="0"
-            allowFullScreen="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          ></iframe>
+          <VideoFrame src={currentVideo?.videoUrl} controls />
         </VideoWrapper>
-        <Title>Mode XL - Pardon</Title>
+        <Title>{currentVideo?.title}</Title>
         <Details>
-          <Info>7,948,14 Görüntüleme &#x25CF; Ağustos 2022</Info>
+          <Info>
+            {currentVideo?.views} &#x25CF; {format(currentVideo?.createdAt)}
+          </Info>
           <Buttons>
-            <Button>
-              <ThumbUpIcon />
+            <Button onClick={handleLike}>
+              {currentVideo.likes?.includes(currentUser?._id) ? (
+                <ThumbUpIcon />
+              ) : (
+                <ThumbUpOutlinedIcon />
+              )}{" "}
+              {currentVideo.likes?.length}
             </Button>
-            <Button>
-              <ThumbDownIcon />
+            <Button onClick={handleDislike}>
+              {currentVideo.dislikes?.includes(currentUser?._id) ? (
+                <ThumbDownIcon />
+              ) : (
+                <ThumbDownOffAltOutlinedIcon />
+              )}{" "}
+              Dislike
             </Button>
             <Button>
               <ShareIcon />
@@ -146,37 +208,23 @@ const Video = () => {
         <Hr />
         <Channel>
           <ChannelInfo>
-            <ChannelImg src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxcy2GPBsBuO7KQLqtZPVTPiG8W3Kf3Asm1g&usqp=CAU" />
+            <ChannelImg src={channel.img} />
             <ChannelText>
-              <Channelh1>cninnmakes</Channelh1>
-              <ChannelSpan>150K Abone</ChannelSpan>
-              <ChannelSpan>
-                Türkçe rap tarihinin en gözde gruplarından olan Mode XL son
-                aylarda yeni single ile severlerini mutlu etmeyi başardı.
-                Keyifli dinlemeler diliyoruz
-              </ChannelSpan>
+              <Channelh1>{channel?.name}</Channelh1>
+              <ChannelSpan>{channel?.subscribers}</ChannelSpan>
+              <ChannelSpan>{currentVideo?.desc}</ChannelSpan>
             </ChannelText>
-            <SubscribeButton>ABONE OL</SubscribeButton>
+            <SubscribeButton onClick={handleSub}>
+              {currentUser?.subscribedUsers?.includes(channel._id)
+                ? "ABONE OLUNDU"
+                : "ABONE OL"}
+            </SubscribeButton>
           </ChannelInfo>
         </Channel>
-        <Comments />
+        <Comments videoId={currentVideo._id} />
       </Content>
 
-      <Recommendation>
-        <Card type='sm'/>
-        <Card type='sm'/>
-        <Card type='sm'/>
-        <Card type='sm'/>
-        <Card type='sm'/>
-        <Card type='sm'/>
-        <Card type='sm'/>
-        <Card type='sm'/>
-        <Card type='sm'/>
-        <Card type='sm'/>
-        <Card type='sm'/>
-        <Card type='sm'/>
-        <Card type='sm'/>
-      </Recommendation>
+    <Recommendation tags={currentVideo.tags}/>
     </Container>
   );
 };

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import User from "../models/User.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { createError } from "../error.js";
 import jwt from "jsonwebtoken";
 
@@ -26,7 +26,7 @@ export const signin = async (req, res, next) => {
 
     if (!isCorrect) return next(createError(400, "Wrong Credentials!"));
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id }, process.env.JWT);
     const { password, ...others } = user._doc;
 
     res
@@ -57,7 +57,7 @@ export const googleAuth = async (req, res, next) => {
         fromGoogle: true,
       });
       const savedUser = await newUser.save();
-      const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET);
+      const token = jwt.sign({ id: savedUser._id }, process.env.JWT);
       res
         .cookie("access_token", token, {
           httpOnly: true,

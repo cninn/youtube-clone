@@ -9,6 +9,9 @@ import SettingsBrightnessIcon from "@mui/icons-material/SettingsBrightness";
 import CopyrightIcon from "@mui/icons-material/Copyright";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import { logout } from '../redux/userSlice';
+import { useDispatch } from 'react-redux';
 
 const Container = styled.div`
   flex: 1;
@@ -96,8 +99,23 @@ const Footer = styled.div`
   font-size: 14px;
   font-weight: 400;
 `;
-const Menu = ({ darkMode, setDarkmode }) => {
+const Menu = ({ darkMode, setDarkMode }) => {
+
   const { currentUser } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
+  const logoutUser = () => (dispatch) => {
+    // Logout action'ını tetikle
+    dispatch(logout());
+  };
+
+ 
+    
+  
+    const handleLogout = () => {
+      // logoutUser fonksiyonunu çağır
+      dispatch(logoutUser());
+    };
 
   return (
     <Container>
@@ -132,7 +150,8 @@ const Menu = ({ darkMode, setDarkmode }) => {
     <Welcome>
     {currentUser && (
       <>
-        <h3>{`Hoşgeldin ${currentUser.name}`}</h3>
+        <h3>Hoşgeldin<br/>{`${currentUser.name}`}</h3>
+        
         <p>Fremium dünyasını keşfetmeye hazırsın</p>
       </>
     )}
@@ -140,7 +159,7 @@ const Menu = ({ darkMode, setDarkmode }) => {
         ) : (
           <Text>
             Giriş yap, videoları beğen yorumla, takip et ve daha fazlası
-            <Link style={{ textDecoration: "none" }} to={"login"}>
+            <Link style={{ textDecoration: "none" }} to={"signin"}>
               <Button>
                 <AccountCircleIcon />
                 GİRİŞ YAP
@@ -150,11 +169,17 @@ const Menu = ({ darkMode, setDarkmode }) => {
         )}
 
         <Hr />
-        <Item onClick={() => setDarkmode(!darkMode)}>
+        <Item onClick={() => setDarkMode(!darkMode)}>
           <SettingsBrightnessIcon />
           Tema
         </Item>
+
+
         <Hr />
+        <Item onClick={handleLogout}>
+          <PowerSettingsNewIcon/>
+          Çıkış yap
+        </Item>
         <Footer className="footer">
           <Item>
             <CopyrightIcon />

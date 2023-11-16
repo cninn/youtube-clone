@@ -19,7 +19,7 @@ const [videos,setVideos] = useState([]);
 useEffect(()=>{
   const fetchVideos = async () => {
     try {
-      const response = await axios.get(`http://localhost:8800/api/videos/${type}`);
+      const response = await axios.get(`/videos/${type}`);
       setVideos(response.data);
       console.log(response.data);
       // Process the videos data

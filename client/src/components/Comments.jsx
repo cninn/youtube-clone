@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import Comment from "./Comment";
-
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 const Container = styled.div`
   display: flex;
@@ -48,27 +50,35 @@ const NotComment = styled.div`
   opacity: 0.6;
 `;
 
-const Comments = () => {
+const Comments = ({ videoId }) => {
+  const { currentUser } = useSelector((state) => state.user);
+  const [comments, setComments] = useState([]);
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8800/api/comments/${videoId}`
+        );
+        setComments(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchComments();
+  }, [videoId]);
+
   return (
     <Container>
       <CommentInputContainer>
-        <CommentImg src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRd8QgVWW6raOHBFS_RFwpQjS6BLB8m9C95irhn7meZMsKMV1NSi85Qy567z6IrwljxBY8&usqp=CAU" />
+        <CommentImg src={currentUser?.img} />
         <CommentInput placeholder="Yorum ekle..." />
       </CommentInputContainer>
 
       <Hr />
-
-      <Comment />
-      <Comment />
-      <Comment />
-      <Comment />
-      <Comment />
-      <Comment />
-      <Comment />
-      <Comment />
-      <Comment />
-      <Comment />
-      <Comment />
+      {comments.map((comment) => (
+        <Comment comment={comment} key={comment._id} />
+      ))}
 
       <NotComment>Henüz hiç yorum yok...</NotComment>
     </Container>

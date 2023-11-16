@@ -1,33 +1,32 @@
-import React from 'react'
-import styled from 'styled-components';
-
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
+import axios from "axios";
 
 const CommentContainer = styled.div`
- color: ${({ theme }) => theme.textSoft};
- display: flex;
- flex-direction: column;
+  color: ${({ theme }) => theme.textSoft};
+  display: flex;
+  flex-direction: column;
 
- 
- align-items: flex-start;
- justify-content: center;
- gap: 10px;
- padding: 20px;
- padding-left: 50px;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  padding-left: 50px;
 `;
 const CommentTitle = styled.h2`
-font-size: 18px;
-cursor: pointer;
+  font-size: 18px;
+  cursor: pointer;
 `;
 const CommentSpan = styled.span`
-opacity: 0.6;
+  opacity: 0.6;
 `;
 const CommentP = styled.p`
-margin-left:50px;
+  margin-left: 50px;
 `;
 const CommentText = styled.div`
-display: flex;
-align-items: center;
-gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 `;
 
 const CommentImg = styled.img`
@@ -39,34 +38,36 @@ const CommentImg = styled.img`
 `;
 
 const CommentWrapper = styled.div`
-display: flex;
-gap: 10px;
-align-items: center;
-`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+`;
 
- const Comment = () => {
+const Comment = ({ comment }) => {
+  const [channel, setChannel] = useState({});
 
-  
-   
+  useEffect(() => {
+    const fetchComments = async () => {
+      const res = await axios.get(
+        `http://localhost:8800/api/users/find/${comment.userId}`
+      );
+      setChannel(res.data);
+    };
+    fetchComments();
+  }, [comment.userId]);
 
-  
   return (
     <CommentContainer>
-    <CommentWrapper>
-    <CommentImg src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRd8QgVWW6raOHBFS_RFwpQjS6BLB8m9C95irhn7meZMsKMV1NSi85Qy567z6IrwljxBY8&usqp=CAU" />
-    <CommentText>
-      <CommentTitle>cninnmakes</CommentTitle>
-      <CommentSpan>3 gün önce</CommentSpan>
+      <CommentWrapper>
+        <CommentImg src={channel?.img} />
+        <CommentText>
+          <CommentTitle>{channel?.name}</CommentTitle>
+          <CommentSpan>{channel?.createdAt}</CommentSpan>
+        </CommentText>
+      </CommentWrapper>
+      <CommentP>{comment.desc}</CommentP>
+    </CommentContainer>
+  );
+};
 
-    </CommentText>
-    </CommentWrapper>
-    <CommentP>
-        Son zamanlarda dinlediğim en iyi şarkılardan birisiydi. umarım daha
-        güzel parçalar dinleriz.
-      </CommentP>
-  </CommentContainer>
-  )
-}
-
-export default Comment
-
+export default Comment;

@@ -76,14 +76,14 @@ display:  ${(props) => props.type === "sm" && "none"};
 `
 const Card = ({ type , video}) => {
 
-  const [channel,setChannel] = useState([]);
+  const [channel,setChannel] = useState({});
 
   useEffect(()=>{
     const fetchChannel = async () => {
       try {
         const response = await axios.get(`http://localhost:8800/api/users/find/${video.userId}`);
         setChannel(response.data);
-        
+       
        
       } catch (error) {
         console.error(error);
@@ -103,7 +103,7 @@ const Card = ({ type , video}) => {
 
 
   return (
-    <Link style={{ textDecoration: "none" }} to={`/video/${video.userId}`}>
+    <Link style={{ textDecoration: "none" }} to={`/video/${video._id}`}>
       <Container type={type}>
         <Image
           type={type}

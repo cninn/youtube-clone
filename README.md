@@ -5,3 +5,6 @@ Some technologies I use;
 *redux
 *jwt
 *bcrypt
+*firebase google authentication
+*crud operations
+*page routes with react-dom

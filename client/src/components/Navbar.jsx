@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SearchIcon from "@mui/icons-material/Search";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import VideoCallIcon from '@mui/icons-material/VideoCall';
+import VideoCallIcon from "@mui/icons-material/VideoCall";
+import Upload from "./Upload";
 
 const Container = styled.div`
   position: sticky;
@@ -60,47 +61,55 @@ const Button = styled.button`
 `;
 
 const User = styled.div`
-display: flex;
-align-items: center;
-gap: 10px;
-font-weight: 500;
-color:${({theme})=>theme.text}
-`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.text};
+`;
 
 const Avatar = styled.img`
-width: 32px;
-height: 32px;
-border-radius: 50%;
-background-color: red;
-`
-  
-
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: red;
+`;
 
 const Navbar = () => {
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(false);
+  const [q,setQ] = useState('')
   const { currentUser } = useSelector((state) => state.user);
 
   return (
-    <Container>
-      <Wrapper>
-        <Search>
-          <Input placeholder="Ara" />
-          <SearchIcon />
-        </Search>
-        <Link style={{ textDecoration: "none" }} to={"login"}>
-          {currentUser ? (<User>
-            <VideoCallIcon/>
-            <Avatar/>
-            {currentUser.name}
-          </User>) :
-               (   <Button>
-                  <AccountCircleIcon />
-                  GİRİŞ YAP
-                </Button>)
-          }
-  
-        </Link>
-      </Wrapper>
-    </Container>
+    <>
+      <Container>
+        <Wrapper>
+          <Search>
+            <Input placeholder="Ara" onChange={e=>setQ(e.target.value)}/>
+            <SearchIcon onClick={()=>navigate(`/search?q=${q}`)}/>
+          </Search>
+          <VideoCallIcon
+            onClick={() => setOpen(true)}
+            style={{ marginRight: "10px", cursor: "pointer" }}
+          />
+          <Link style={{ textDecoration: "none" }} to={"signin"}>
+            {currentUser ? (
+              <User>
+                <Avatar src={currentUser.img} />
+                {currentUser.name}
+              </User>
+            ) : (
+              <Button>
+                <AccountCircleIcon />
+                GİRİŞ YAP
+              </Button>
+            )}
+          </Link>
+        </Wrapper>
+      </Container>
+      {open && <Upload setOpen={setOpen} />}
+    </>
   );
 };
 
